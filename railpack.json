@@ -1,0 +1,10 @@
+{
+    "$schema": "https://schema.railpack.com",
+    "steps": {
+        "build": {
+            "commands": [
+                "mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache storage/framework/testing storage/logs bootstrap/cache"
+            ]
+        }
+    }
+}
