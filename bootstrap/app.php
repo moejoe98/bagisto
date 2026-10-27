@@ -1,5 +1,8 @@
 <?php
 
+use ApiPlatform\Laravel\ApiPlatformDeferredProvider;
+use ApiPlatform\Laravel\ApiPlatformProvider;
+use ApiPlatform\Laravel\Eloquent\ApiPlatformEventProvider;
 use App\Http\Middleware\EncryptCookies;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Cookie\Middleware\EncryptCookies as BaseEncryptCookies;
@@ -61,4 +64,10 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
-    })->create();
+    })
+    ->withProviders([
+        ApiPlatformProvider::class,
+        ApiPlatformDeferredProvider::class,
+        ApiPlatformEventProvider::class,
+    ])
+    ->create();
