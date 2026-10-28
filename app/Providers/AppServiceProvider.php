@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use ApiPlatform\Metadata\Resource\Factory\ResourceNameCollectionFactoryInterface;
+use App\Api\Metadata\ResourceNameCollectionFactory;
 use Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\ParallelTesting;
@@ -15,6 +17,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->extend(
+            ResourceNameCollectionFactoryInterface::class,
+            fn (ResourceNameCollectionFactoryInterface $factory) => new ResourceNameCollectionFactory($factory)
+        );
+
         $allowedIPs = array_map('trim', explode(',', config('app.debug_allowed_ips', '')));
 
         $allowedIPs = array_filter($allowedIPs);
