@@ -110,6 +110,7 @@ return [
         ],
         // GraphQL middleware for authentication and rate limiting
         'middleware' => [
+            'App\Http\Middleware\NegotiateGraphQlMultipart',
             'Webkul\BagistoApi\Http\Middleware\VerifyGraphQLStorefrontKey',
             'Webkul\BagistoApi\Http\Middleware\SetLocaleChannel',
         ],

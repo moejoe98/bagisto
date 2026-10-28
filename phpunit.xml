@@ -7,6 +7,9 @@
 >
     <testsuites>
         <!-- Testsuites that span the packages rather than belonging to one. -->
+        <testsuite name="App Feature Test">
+            <directory suffix="Test.php">tests/Feature</directory>
+        </testsuite>
         <testsuite name="Unit Test">
             <directory suffix="Test.php">tests/Unit</directory>
         </testsuite>

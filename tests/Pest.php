@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Storage;
 use Pest\Repositories\DatasetsRepository;
+use Tests\ApiTestCase;
 use Webkul\Admin\Tests\AdminTestCase;
 use Webkul\Category\Tests\CategoryTestCase;
 use Webkul\Core\Tests\CoreTestCase;
@@ -62,6 +63,7 @@ uses(ShopTestCase::class)->in('../packages/Webkul/Shop/tests');
 uses(StripeTestCase::class)->in('../packages/Webkul/Stripe/tests');
 uses(TaxTestCase::class)->in('../packages/Webkul/Tax/tests');
 uses(ThemeTestCase::class)->in('../packages/Webkul/Theme/tests');
+uses(ApiTestCase::class)->in('Feature/Api');
 
 /*
 |--------------------------------------------------------------------------
