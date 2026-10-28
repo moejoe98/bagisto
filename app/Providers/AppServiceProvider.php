@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use ApiPlatform\GraphQl\Resolver\QueryItemResolverInterface;
 use ApiPlatform\Metadata\Resource\Factory\ResourceNameCollectionFactoryInterface;
 use App\Api\Metadata\ResourceNameCollectionFactory;
+use App\Api\Resolver\StoreConfigQueryResolver;
 use Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\ParallelTesting;
@@ -21,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
             ResourceNameCollectionFactoryInterface::class,
             fn (ResourceNameCollectionFactoryInterface $factory) => new ResourceNameCollectionFactory($factory)
         );
+
+        $this->app->tag(StoreConfigQueryResolver::class, QueryItemResolverInterface::class);
 
         $allowedIPs = array_map('trim', explode(',', config('app.debug_allowed_ips', '')));
 
