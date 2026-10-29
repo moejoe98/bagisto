@@ -6,6 +6,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
+use Symfony\Component\HttpFoundation\File\UploadedFile as SymfonyUploadedFile;
 use Webkul\BagistoApi\Models\StorefrontKey;
 use Webkul\Core\Models\Channel;
 use Webkul\Customer\Models\Customer;
@@ -57,6 +58,9 @@ abstract class ApiTestCase extends TestCase
     /**
      * Send a GraphQL multipart request carrying files, following the GraphQL multipart request specification.
      *
+     * The files are passed on as plain Symfony uploads, which is what the GraphQL entrypoint hands a resolver on a real
+     * server, rather than the Laravel uploads the test client would otherwise create.
+     *
      * @param  array<string, UploadedFile>  $files  Files keyed by their variable path, e.g. "input.images.0".
      */
     protected function graphQlUpload(string $query, array $variables, array $files, Customer $customer): TestResponse
@@ -66,7 +70,7 @@ abstract class ApiTestCase extends TestCase
 
         foreach (array_values($files) as $index => $file) {
             $map[(string) $index] = ['variables.'.array_keys($files)[$index]];
-            $parts[(string) $index] = $file;
+            $parts[(string) $index] = new SymfonyUploadedFile($file->getPathname(), $file->getClientOriginalName(), $file->getClientMimeType(), null, true);
         }
 
         return $this->call('POST', '/api/graphql', [

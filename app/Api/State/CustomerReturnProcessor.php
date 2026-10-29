@@ -6,6 +6,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Validator;
+use Symfony\Component\HttpFoundation\File\UploadedFile as SymfonyUploadedFile;
 use Webkul\BagistoApi\Dto\CreateCustomerReturnInput;
 use Webkul\BagistoApi\Exception\InvalidInputException;
 use Webkul\BagistoApi\Models\CustomerReturn;
@@ -75,15 +76,22 @@ class CustomerReturnProcessor implements ProcessorInterface
     }
 
     /**
-     * The files sent in the mutation's images argument.
+     * The files sent in the mutation's images argument, as Laravel uploads.
      *
-     * @return array<int, UploadedFile>
+     * The GraphQL entrypoint passes on the Symfony uploads it reads from the multipart request.
+     *
+     * @return array<int, mixed>
      */
     protected function uploadedFiles(array $context): array
     {
-        $images = $context['args']['input']['images'] ?? [];
+        $images = array_values(array_filter((array) ($context['args']['input']['images'] ?? [])));
 
-        return array_values(array_filter((array) $images));
+        return array_map(
+            fn ($image) => $image instanceof SymfonyUploadedFile && ! $image instanceof UploadedFile
+                ? UploadedFile::createFromBase($image)
+                : $image,
+            $images
+        );
     }
 
     /**

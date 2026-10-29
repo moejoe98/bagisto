@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\File\UploadedFile as SymfonyUploadedFile;
 use Symfony\Component\Mime\MimeTypes;
 use Webkul\Admin\Mail\Admin\RMA\CustomerToAdminConversationNotification;
 use Webkul\BagistoApi\Dto\SendCustomerReturnMessageInput;
@@ -44,11 +45,11 @@ class CustomerReturnMessageProcessor implements ProcessorInterface
      */
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): mixed
     {
-        $file = $context['args']['input']['file'] ?? null;
+        $file = $this->uploadedFile($context);
 
         if (
             ! $data instanceof SendCustomerReturnMessageInput
-            || ! $file instanceof UploadedFile
+            || $file === null
         ) {
             return $this->customerReturnMessageProcessor->process($data, $operation, $uriVariables, $context);
         }
@@ -93,9 +94,23 @@ class CustomerReturnMessageProcessor implements ProcessorInterface
     }
 
     /**
+     * The file sent in the mutation's file argument, as a Laravel upload, or null when none was sent.
+     *
+     * The GraphQL entrypoint passes on the Symfony upload it reads from the multipart request.
+     */
+    protected function uploadedFile(array $context): mixed
+    {
+        $file = $context['args']['input']['file'] ?? null;
+
+        return $file instanceof SymfonyUploadedFile && ! $file instanceof UploadedFile
+            ? UploadedFile::createFromBase($file)
+            : $file;
+    }
+
+    /**
      * Reject the file unless it is an allowed type and within the size limit.
      */
-    protected function validateFile(UploadedFile $file): void
+    protected function validateFile(mixed $file): void
     {
         $validator = Validator::make(['file' => $file], [
             'file' => 'file|max:'.self::MAX_FILE_KILOBYTES.'|mimetypes:'.core()->getConfigData('sales.rma.setting.allowed_file_extension'),

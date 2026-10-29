@@ -161,6 +161,19 @@ it('sends a message carrying only a file', function () {
         ->and($response->json('data.createCustomerReturnMessage.customerReturnMessage.attachment'))->toBe('label.png');
 });
 
+it('rejects a message file type the store does not allow, without saving the message', function () {
+    $customer = $this->createCustomer();
+    $seed = $this->createReturnableOrder($customer);
+    $returnId = $this->graphQl(CREATE_RETURN, ['input' => returnInput($seed)], $customer)->json('data.createCustomerReturn.customerReturn._id');
+
+    $response = $this->graphQlUpload(SEND_MESSAGE, ['input' => ['returnId' => (int) $returnId, 'message' => 'Receipt attached', 'file' => null]], [
+        'input.file' => UploadedFile::fake()->create('receipt.pdf', 20, 'application/pdf'),
+    ], $customer);
+
+    expect($response->json('errors.0.message'))->toContain('must be a file of type')
+        ->and(RMAMessage::where('rma_id', $returnId)->where('message', 'Receipt attached')->exists())->toBeFalse();
+});
+
 it('still sends a message without a file', function () {
     $customer = $this->createCustomer();
     $seed = $this->createReturnableOrder($customer);
